@@ -10,7 +10,7 @@ function renderItems(){
   for(const [index,[section,names]] of catalog.entries()){
     html+=`<h3 class="section-label">${section}</h3><table class="items"><thead><tr><th>Item</th><th>Rate</th><th>Qty</th><th>Amount</th></tr></thead><tbody>`;
     for(const name of names){let i=items.indexOf(name);html+=`<tr><td>${escapeHtml(name)}</td><td>${money(rateFor(name))}</td><td><input aria-label="${escapeHtml(name)} quantity" type="number" min="0" step="1" data-qty="${i}" value="${quantities[name]||0}"></td><td id="amount-${i}">₹0</td></tr>`}
-    html+=`</tbody></table><div class="add-item bill-add"><label>New item name<input data-bill-name="${index}" placeholder="e.g. Kurta"></label><label>Price ₹<input data-bill-price="${index}" type="number" min="0.01" step="0.01" placeholder="Per item"></label><button class="btn ghost" type="button" data-bill-add="${index}">+ Add to ${section}</button></div>`;
+    html+=`</tbody></table><details class="add-item bill-add"><summary>+ Add item</summary><div class="add-fields"><label>New item name<input data-bill-name="${index}" placeholder="e.g. Kurta"></label><label>Price ₹<input data-bill-price="${index}" type="number" min="0.01" step="0.01" placeholder="Per item"></label><button class="btn ghost" type="button" data-bill-add="${index}">Save item</button></div></details>`;
   }
   $('itemRows').innerHTML=html;
   document.querySelectorAll('[data-qty]').forEach(el=>el.oninput=()=>{quantities[items[el.dataset.qty]]=Math.max(0,Math.floor(Number(el.value)||0));calculate()});
@@ -37,7 +37,7 @@ function addCustomItem(index,value,price,statusId){
   persist();return name;
 }
 function renderPrices(){
-  $('priceRows').innerHTML=catalog.map(([section,names],index)=>`<h3 class="section-label">${section}</h3><div class="fields">${names.map(name=>`<label>${escapeHtml(name)}<input type="number" min="0" step="0.01" data-price="${escapeHtml(name)}" value="${data.prices[name]??''}" placeholder="₹ per item"></label>`).join('')}</div><div class="add-item"><label>Add an item to ${section}<input data-new-item="${index}" placeholder="Item name, e.g. Kurta"></label><button class="btn ghost" data-add-item="${index}" type="button">+ Add item</button></div>`).join('');
+  $('priceRows').innerHTML=catalog.map(([section,names],index)=>`<h3 class="section-label">${section}</h3><div class="fields">${names.map(name=>`<label>${escapeHtml(name)}<input type="number" min="0" step="0.01" data-price="${escapeHtml(name)}" value="${data.prices[name]??''}" placeholder="₹ per item"></label>`).join('')}</div><details class="add-item"><summary>+ Add item</summary><div class="add-fields"><label>Add an item to ${section}<input data-new-item="${index}" placeholder="Item name, e.g. Kurta"></label><button class="btn ghost" data-add-item="${index}" type="button">Save item</button></div></details>`).join('');
   document.querySelectorAll('[data-add-item]').forEach(button=>button.onclick=()=>{
     const index=Number(button.dataset.addItem),input=$('priceRows').querySelector(`[data-new-item="${index}"]`),name=input.value.trim().replace(/\s+/g,' ');
     const enteredPrices=[...document.querySelectorAll('[data-price]')].map(el=>[el.dataset.price,el.value]);
