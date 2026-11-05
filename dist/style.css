@@ -49,13 +49,21 @@ body{cursor:default}input{cursor:text}input[type="month"]{cursor:default}
 html.cloud-enabled main{visibility:hidden}
 
 @media print{
-  #invoice{box-sizing:border-box;min-height:267mm;padding:8mm;background:#fbfaf4;color:#243647}
-  .invoice-top{align-items:center;padding-top:0}
-  .invoice-logo{padding:10px 16px;background:#f4e98b;border-radius:5px}
-  .invoice-mark{font-size:27px;line-height:1.15;color:#bf4840}
-  .invoice-brand{font-size:26px;line-height:1.15;letter-spacing:0;color:#4175af}
-  .invoice-tag{margin-top:5px;font-size:10px;letter-spacing:.02em;color:#3c5364}
-  .invoice-stripe{height:3px;background:#d9bf57}
-  .invoice-items th{background:#e8eced;color:#243647}
-  .invoice-total{background:#f2edd8}
+  #invoice{box-sizing:border-box;display:flex;flex-direction:column;min-height:267mm;padding:13mm;background:#f5d1f1;color:#202997;border-radius:12px}
+  .invoice-top{align-items:center;padding:0 0 10mm}
+  .invoice-title{order:-1;text-align:left;font-size:36px;letter-spacing:.04em;color:#202997}
+  .invoice-title span{font-size:11px;color:#202997}
+  .invoice-logo{padding:8px 12px;background:#f5e88b;border-radius:4px}
+  .invoice-mark{font-size:21px;line-height:1.1;color:#bf4840}
+  .invoice-brand{font-size:20px;line-height:1.1;letter-spacing:0;color:#4175af}
+  .invoice-tag{margin-top:4px;font-size:9px;letter-spacing:0;color:#3c5364}
+  .invoice-stripe{height:1px;background:#202997}
+  .invoice-meta{gap:20mm;padding:9mm 0 12mm}
+  .invoice-meta small,.invoice-meta strong,.invoice-meta span{color:#202997}
+  .invoice-items th{background:#202997;color:#fff;padding:11px 10px}
+  .invoice-items td{border:1px solid #666ac2;padding:12px 10px;color:#202997}
+  .invoice-total{margin:0;padding:16px 12px;background:transparent;border:1px solid #666ac2;border-top:0;color:#202997}
+  .invoice-total strong{color:#202997}
+  .invoice-footer{margin-top:auto;border-top:1px solid #202997;color:#202997}
+  .invoice-footer strong{color:#202997}
 }
