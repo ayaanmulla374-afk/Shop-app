@@ -47,3 +47,15 @@ body{cursor:default}input{cursor:text}input[type="month"]{cursor:default}
 .cloud-gate{position:fixed;inset:0;z-index:100;background:#173a50e8;display:grid;place-items:center;padding:20px}.cloud-gate.hidden{display:none}.cloud-gate .card{width:min(100%,420px);margin:0}.cloud-gate label{margin:15px 0}.cloud-gate button{width:100%}#cloudStatus{min-height:20px;margin-top:12px;color:#a33535;font-weight:700}@media print{.cloud-gate{display:none!important}}
 
 html.cloud-enabled main{visibility:hidden}
+
+@media print{
+  #invoice{box-sizing:border-box;min-height:267mm;padding:8mm;background:#fbfaf4;color:#243647}
+  .invoice-top{align-items:center;padding-top:0}
+  .invoice-logo{padding:10px 16px;background:#f4e98b;border-radius:5px}
+  .invoice-mark{font-size:27px;line-height:1.15;color:#bf4840}
+  .invoice-brand{font-size:26px;line-height:1.15;letter-spacing:0;color:#4175af}
+  .invoice-tag{margin-top:5px;font-size:10px;letter-spacing:.02em;color:#3c5364}
+  .invoice-stripe{height:3px;background:#d9bf57}
+  .invoice-items th{background:#e8eced;color:#243647}
+  .invoice-total{background:#f2edd8}
+}
