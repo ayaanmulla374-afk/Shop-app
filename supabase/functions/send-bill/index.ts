@@ -42,7 +42,8 @@ Deno.serve(async (request) => {
     const lines = bill.lines.map((line: { name: string; qty: number; rate: number }) =>
       `${line.name}: ${line.qty} × ${amount(line.rate)} = ${amount(line.qty * line.rate)}`,
     ).join('\n');
-    const message = `Maharashtra Dry Cleaners\nBill for ${bill.name} (Flat ${bill.flat})\n${bill.from} to ${bill.to}\n${lines}\nTotal: ${amount(bill.total)}`;
+    const period = bill.date ? new Date(`${bill.date}T00:00:00`).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }) : `${bill.from} to ${bill.to}`;
+    const message = `Maharashtra Dry Cleaners\nBill for ${bill.name}${bill.flat ? ` (Flat ${bill.flat})` : ''}\n${period}\n${lines}\nTotal: ${amount(bill.total)}`;
     const sent = await fetch(`${wahaUrl.replace(/\/$/, '')}/api/sendText`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Api-Key': wahaKey },
