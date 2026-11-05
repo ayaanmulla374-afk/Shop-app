@@ -41,3 +41,5 @@ body{cursor:default}input{cursor:text}input[type="month"]{cursor:default}
 }
 
 .fields.two input[type="month"]{cursor:pointer}
+
+.period-pickers{display:flex;gap:8px}.period-pickers select{min-width:0;cursor:pointer}.period-pickers select:first-child{flex:1.4}.period-pickers select:last-child{flex:1}
