@@ -2,7 +2,9 @@
 
 A simple private billing site for pressing and dry cleaning. The current site lets you set prices, add items, enter quantities, calculate totals, save bills in the current browser, print bills, and open a prepared WhatsApp message for manual sending.
 
-**Live site:** https://maharashtra-dry-cleaners-billing.nachojibharke.chatgpt.site
+**GitHub live site:** https://ayaanmulla374-afk.github.io/Shop-app/
+
+**Supabase and WAHA setup:** See [supabase/SETUP.md](supabase/SETUP.md). The live site uses browser storage and manual WhatsApp until `dist/config.js` is filled with a Supabase Project URL and publishable key.
 
 ## Run locally
 
