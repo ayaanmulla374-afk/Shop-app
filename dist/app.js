@@ -20,7 +20,7 @@ function renderItems(){
   let html='';
   for(const [index,[section,names]] of catalog.entries()){
     html+=`<h3 class="section-label">${section}</h3><table class="items"><thead><tr><th>Item</th><th>Rate</th><th>Qty</th><th>Amount</th></tr></thead><tbody>`;
-    for(const name of names){let i=items.indexOf(name);html+=`<tr><td>${escapeHtml(name)}</td><td>${money(rateFor(name))}</td><td><input aria-label="${escapeHtml(name)} quantity" type="number" min="0" step="1" data-qty="${i}" value="${quantities[name]||0}"></td><td id="amount-${i}">₹0</td></tr>`}
+    for(const name of names){let i=items.indexOf(name);html+=`<tr><td>${escapeHtml(name)}</td><td>${money(rateFor(name))}</td><td><input aria-label="${escapeHtml(name)} quantity" type="number" min="0" step="1" data-qty="${i}" value="${quantities[name]||''}" placeholder="0"></td><td id="amount-${i}">₹0</td></tr>`}
     html+=`</tbody></table><details class="add-item bill-add"><summary>+ Add item</summary><div class="add-fields"><label>New item name<input data-bill-name="${index}" placeholder="e.g. Kurta"></label><label>Price ₹<input data-bill-price="${index}" type="number" min="0.01" step="0.01" placeholder="Per item"></label><button class="btn ghost" type="button" data-bill-add="${index}">Save item</button></div></details>`;
   }
   $('itemRows').innerHTML=html;
