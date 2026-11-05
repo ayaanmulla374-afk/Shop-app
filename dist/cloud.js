@@ -51,7 +51,7 @@
   const signOut = document.createElement('button');
   signOut.className = 'btn ghost';
   signOut.textContent = 'Sign out';
-  signOut.onclick = async () => { await client.auth.signOut(); location.reload(); };
+  signOut.onclick = async () => { await client.auth.signOut(); sessionStorage.removeItem(draftKey); location.reload(); };
   $('settings').querySelector('.card').append(signOut);
   try { await openShop(); } catch { $('cloudStatus').textContent = 'Sign in to open your shop data.'; }
 })();
