@@ -7,4 +7,6 @@
 
 .bill-add .add-fields button{background:#f2dc4e;color:#173247}
 @media print{.add-item{display:none!important}}
-header{flex-direction:column;align-items:center;text-align:center}
+`nheader{flex-direction:column;align-items:center;text-align:center}
+
+body{cursor:default}input{cursor:text}input[type="month"]{cursor:default}
