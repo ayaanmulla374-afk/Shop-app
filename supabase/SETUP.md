@@ -1,15 +1,23 @@
-# Connect Supabase and WAHA
+# Supabase and automatic WhatsApp bills
 
-The live site still uses browser storage and opens WhatsApp for manual sending. These steps prepare the services; do not treat them as connected until the site code is switched to Supabase and tested.
+The live site already has a Supabase Project URL and publishable key in `dist/config.js`. Owner sign-in and bill saving use the `shop_state` table defined in [schema.sql](schema.sql). Keep RLS enabled. The current WhatsApp action remains manual until the steps below are complete.
 
-1. Create a Supabase project. In **Authentication → Users**, add your shop-owner account and set its password. Disable public sign-ups if only the shop owner should use the site.
-2. In **SQL Editor**, run [`schema.sql`](schema.sql). It creates one state row per signed-in user and RLS rules that allow only that user to read or change the row. Do not turn RLS off.
-3. In **Project Settings → API Keys**, copy the **Project URL** and **publishable key** (`sb_publishable_...`). These are the only Supabase values that may go into browser code. Never paste a secret key or service-role key into GitHub Pages.
-4. Run WAHA on an always-on server reachable through **HTTPS**. Create a strong WAHA API key, start the `default` session or note its actual name, scan the QR code, and confirm that the session is **WORKING**. Send a test message to your own number from WAHA before connecting the site.
-5. In Supabase **Edge Functions → Deploy a new function → Via Editor**, name it `send-bill`, paste [`functions/send-bill/index.ts`](functions/send-bill/index.ts), and deploy it. Keep JWT verification enabled. The function accepts a saved bill ID and PDF from a signed-in user, verifies that user's bill under RLS, then sends a thank-you message followed by the PDF through WAHA.
-6. In Supabase **Edge Functions → Secrets**, enter `WAHA_URL` (the HTTPS base URL without `/api/sendText`), `WAHA_SESSION` (for example `default`), and `WAHA_API_KEY`. Enter the key in Supabase only. Do not put it in this repository or the browser.
-7. In GitHub, open [`dist/config.js`](../dist/config.js), click the pencil icon, and enter the Supabase Project URL and **publishable key** between the quotes. Commit the change to `main`. GitHub Pages will redeploy automatically. Do not enter the secret or service-role key there.
-8. Open the live site and sign in with the owner email and password. Existing bills in that browser are copied to Supabase; bills from other browsers are copied when you sign in there. The browser copies are retained as a backup.
-9. Test saving a bill, refreshing, opening it on another device, signing out, and sending a bill to your own WhatsApp number. Confirm the thank-you text arrives before the PDF and that an unsigned visitor cannot read shop data. The site's WhatsApp button switches to automatic sending only after Supabase is configured and signed in.
+## Prepare Meta WhatsApp Business Platform
 
-Supabase's [API key guide](https://supabase.com/docs/guides/getting-started/api-keys), [RLS guide](https://supabase.com/docs/guides/database/postgres/row-level-security), and [Edge Function dashboard guide](https://supabase.com/docs/guides/functions/quickstart-dashboard) explain the dashboard controls. WAHA's [quick start](https://waha.devlike.pro/docs/overview/quick-start/) shows its session and `/api/sendText` endpoint.
+1. Set up direct Cloud API access for the shop's WhatsApp Business number in Meta Business Manager. Confirm that the number can use the Business app and Platform together if you need both. Obtain its **Phone Number ID** and an access token with permission to send WhatsApp messages. Keep the token private.
+2. In WhatsApp Manager, create and get approval for these **Utility** templates in language code `en`:
+   - `bill_thank_you`: text body `Thank you for shopping with Maharashtra Dry Cleaners. Your bill is attached below.`
+   - `bill_pdf`: **document header** and text body such as `Your bill from Maharashtra Dry Cleaners is attached.`
+   The names, language, and document header must match the code. Meta may classify or reject a template; check its approved status before continuing. Collect the customer's agreement to receive bills on WhatsApp.
+3. Add a payment method in Meta if required for business-initiated messages. Confirm the phone number can send an approved template to your own test number.
+
+## Deploy the send function
+
+4. In Supabase **Edge Functions**, deploy [functions/send-bill/index.ts](functions/send-bill/index.ts) as `send-bill`, with JWT verification enabled. The function authenticates the owner, reads that owner's saved bill under RLS, uploads the supplied PDF to Meta, then submits the thank-you template and PDF template in that order.
+5. In **Edge Function secrets**, set `META_PHONE_NUMBER_ID` and `META_ACCESS_TOKEN`. Supabase provides `SUPABASE_URL` and `SUPABASE_ANON_KEY`. Never put the Meta token in browser code, GitHub, or chat.
+6. Test with a bill addressed to your own WhatsApp number. Check both messages and the attached PDF on the phone. A successful API response means Meta **accepted** the messages; it is not proof of delivery. If the thank-you succeeds but the PDF fails, the function reports that partial failure so you can send the PDF manually.
+7. Only after the test succeeds, change `window.SHOP_WHATSAPP_AUTO` to `true` in `dist/config.js` and redeploy GitHub Pages. The button then becomes **Send bill on WhatsApp**. Leave it `false` to retain the manual PDF download and WhatsApp handoff.
+
+The function uses Graph API `v25.0`; review its supported version when Meta announces a retirement. Bill PDFs are generated in the browser and sent to the function only for this request. The bill data remains in Supabase.
+
+References: [Meta Cloud API examples](https://www.postman.com/meta/whatsapp-business-platform/overview), [document templates](https://whatsappbusiness.com/blog/manage-message-templates-whatsapp-business-api/), [messaging policy](https://whatsappbusiness.com/policy/), and [Supabase Edge Functions](https://supabase.com/docs/guides/functions).
