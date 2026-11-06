@@ -19,15 +19,15 @@ Deno.serve(async (request) => {
   if (!token) return reply(401, 'Sign in first');
   const url = Deno.env.get('SUPABASE_URL');
   const key = Deno.env.get('SUPABASE_ANON_KEY');
-  const wahaUrl = Deno.env.get('WAHA_URL');
-  const wahaKey = Deno.env.get('WAHA_API_KEY');
-  const session = Deno.env.get('WAHA_SESSION');
-  if (!url || !key || !wahaUrl || !wahaKey || !session) return reply(500, 'Server settings are incomplete');
+  const phoneId = Deno.env.get('META_PHONE_NUMBER_ID');
+  const metaToken = Deno.env.get('META_ACCESS_TOKEN');
+  if (!url || !key || !phoneId || !metaToken) return reply(500, 'Server settings are incomplete');
+  if (!/^\d+$/.test(phoneId)) return reply(500, 'Meta phone number ID is invalid');
 
   try {
     const { billId, pdf } = await request.json();
-    if (typeof billId !== 'string') return reply(400, 'Bill ID required');
-    if (typeof pdf !== 'string' || pdf.length > 6_700_000 || !pdf.startsWith('JVBERi0') || !/^[A-Za-z0-9+/]+={0,2}$/.test(pdf)) return reply(400, 'Valid bill PDF required');
+    if (typeof billId !== 'string' || !billId) return reply(400, 'Bill ID required');
+    if (typeof pdf !== 'string' || pdf.length > 6_700_000 || pdf.length % 4 || !pdf.startsWith('JVBERi0') || !/^[A-Za-z0-9+/]+={0,2}$/.test(pdf)) return reply(400, 'Valid bill PDF required');
     const authHeaders = { apikey: key, Authorization: `Bearer ${token}` };
     const userResponse = await fetch(`${url}/auth/v1/user`, { headers: authHeaders });
     if (!userResponse.ok) return reply(401, 'Sign in again');
@@ -39,27 +39,32 @@ Deno.serve(async (request) => {
     if (!bill) return reply(404, 'Bill not found');
     const phone = String(bill.phone || '').replace(/\D/g, '');
     if (!/^(91)?[6-9]\d{9}$/.test(phone)) return reply(400, 'Bill needs a valid WhatsApp number');
-    const chatId = `${phone.length === 10 ? '91' + phone : phone}@c.us`;
-    const apiUrl = wahaUrl.replace(/\/$/, '');
-    const wahaHeaders = { 'Content-Type': 'application/json', 'X-Api-Key': wahaKey };
-    const sent = await fetch(`${apiUrl}/api/sendText`, {
-      method: 'POST',
-      headers: wahaHeaders,
-      body: JSON.stringify({ chatId, text: 'Thank you for shopping with Maharashtra Dry Cleaners. Your bill is attached below.', session }),
+    const to = phone.length === 10 ? `91${phone}` : phone;
+    const endpoint = `https://graph.facebook.com/v25.0/${phoneId}`;
+    const metaHeaders = { Authorization: `Bearer ${metaToken}` };
+
+    const media = new FormData();
+    media.append('messaging_product', 'whatsapp');
+    media.append('file', new Blob([Uint8Array.from(atob(pdf), c => c.charCodeAt(0))], { type: 'application/pdf' }), `Bill-${billId}.pdf`);
+    const upload = await fetch(`${endpoint}/media`, { method: 'POST', headers: metaHeaders, body: media });
+    if (!upload.ok) return reply(502, `Meta could not upload the PDF (${upload.status})`);
+    const mediaId = (await upload.json()).id;
+    if (!mediaId) return reply(502, 'Meta did not return a PDF media ID');
+
+    const send = (template: object) => fetch(`${endpoint}/messages`, {
+      method: 'POST', headers: { ...metaHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messaging_product: 'whatsapp', to, type: 'template', template }),
     });
-    if (!sent.ok) return reply(502, `WAHA could not send the thank-you message (${sent.status})`);
-    let attachment;
+    const sentText = await send({ name: 'bill_thank_you', language: { code: 'en' } });
+    if (!sentText.ok) return reply(502, `Meta could not send the thank-you message (${sentText.status})`);
+    let document;
     try {
-      attachment = await fetch(`${apiUrl}/api/sendFile`, {
-        method: 'POST',
-        headers: wahaHeaders,
-        body: JSON.stringify({ chatId, session, file: { mimetype: 'application/pdf', filename: `Bill-${billId}.pdf`, data: pdf } }),
-      });
+      document = await send({ name: 'bill_pdf', language: { code: 'en' }, components: [{ type: 'header', parameters: [{ type: 'document', document: { id: mediaId, filename: `Bill-${billId}.pdf` } }] }] });
     } catch {
-      return reply(502, 'Thank-you sent, but the PDF could not be sent. Attach the bill manually.');
+      return reply(502, 'Thank-you sent, but the PDF could not be sent. Send the PDF manually.');
     }
-    if (!attachment.ok) return reply(502, `Thank-you sent, but the PDF failed (${attachment.status}). Attach the bill manually.`);
-    return reply(200, 'Thank-you message and bill PDF sent');
+    if (!document.ok) return reply(502, `Thank-you sent, but the PDF failed (${document.status}). Send the PDF manually.`);
+    return reply(200, 'Thank-you message and bill PDF accepted by Meta');
   } catch {
     return reply(500, 'Could not send bill');
   }
