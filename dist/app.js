@@ -80,14 +80,22 @@ async function billPdf(b){
 function pdfBase64(blob){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result.split(',')[1]);reader.onerror=()=>reject(Error('Could not read the bill PDF.'));reader.readAsDataURL(blob)})}
 $('sendBill').onclick=async()=>{let chat;try{
   const b=currentBill(),message='Thank you for shopping with Maharashtra Dry Cleaners. Your bill is attached below.';
-  chat=window.open('about:blank','_blank');
-  if(!chat)throw Error('Allow pop-ups to open WhatsApp.');
+  const automatic=Boolean(cloudClient&&window.SHOP_WHATSAPP_AUTO);
+  if(!automatic){chat=window.open('about:blank','_blank');if(!chat)throw Error('Allow pop-ups to open WhatsApp.')}
   if(cloudClient){
     data.bills=data.bills.filter(x=>x.id!==b.id);data.bills.unshift(b);openedBill=b;
-    if(!await persist()){chat.close();return}
+    if(!await persist()){chat?.close();return}
     saveDraft();
   }
-  const pdf=await billPdf(b),url=URL.createObjectURL(pdf),link=document.createElement('a');
+  const pdf=await billPdf(b);
+  if(automatic){
+    if(pdf.size>5_000_000)throw Error('Bill PDF is too large to send.');
+    const {data:result,error}=await cloudClient.functions.invoke('send-bill',{body:{billId:b.id,pdf:await pdfBase64(pdf)}});
+    if(error){let message=error.message;try{message=(await error.context.json()).message||message}catch{}throw Error(message)}
+    showStatus('billStatus',result?.message||'Bill accepted by Meta.');
+    return;
+  }
+  const url=URL.createObjectURL(pdf),link=document.createElement('a');
   link.href=url;link.download=`Bill-${b.name.replace(/[^a-z0-9-]+/gi,'-')}.pdf`;link.click();
   setTimeout(()=>URL.revokeObjectURL(url),60000);
   const phone=b.phone.replace(/\D/g,'');
