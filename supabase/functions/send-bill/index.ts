@@ -25,8 +25,9 @@ Deno.serve(async (request) => {
   if (!url || !key || !wahaUrl || !wahaKey || !session) return reply(500, 'Server settings are incomplete');
 
   try {
-    const { billId } = await request.json();
+    const { billId, pdf } = await request.json();
     if (typeof billId !== 'string') return reply(400, 'Bill ID required');
+    if (typeof pdf !== 'string' || pdf.length > 6_700_000 || !pdf.startsWith('JVBERi0') || !/^[A-Za-z0-9+/]+={0,2}$/.test(pdf)) return reply(400, 'Valid bill PDF required');
     const authHeaders = { apikey: key, Authorization: `Bearer ${token}` };
     const userResponse = await fetch(`${url}/auth/v1/user`, { headers: authHeaders });
     if (!userResponse.ok) return reply(401, 'Sign in again');
@@ -38,19 +39,27 @@ Deno.serve(async (request) => {
     if (!bill) return reply(404, 'Bill not found');
     const phone = String(bill.phone || '').replace(/\D/g, '');
     if (!/^(91)?[6-9]\d{9}$/.test(phone)) return reply(400, 'Bill needs a valid WhatsApp number');
-    const amount = (value: number) => `₹${Number(value).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
-    const lines = bill.lines.map((line: { name: string; qty: number; rate: number }) =>
-      `${line.name}: ${line.qty} × ${amount(line.rate)} = ${amount(line.qty * line.rate)}`,
-    ).join('\n');
-    const period = bill.date ? new Date(`${bill.date}T00:00:00`).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }) : `${bill.from} to ${bill.to}`;
-    const message = `Maharashtra Dry Cleaners\nBill for ${bill.name}${bill.flat ? ` (Flat ${bill.flat})` : ''}\n${period}\n${lines}\nTotal: ${amount(bill.total)}`;
-    const sent = await fetch(`${wahaUrl.replace(/\/$/, '')}/api/sendText`, {
+    const chatId = `${phone.length === 10 ? '91' + phone : phone}@c.us`;
+    const apiUrl = wahaUrl.replace(/\/$/, '');
+    const wahaHeaders = { 'Content-Type': 'application/json', 'X-Api-Key': wahaKey };
+    const sent = await fetch(`${apiUrl}/api/sendText`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Api-Key': wahaKey },
-      body: JSON.stringify({ chatId: `${phone.length === 10 ? '91' + phone : phone}@c.us`, text: message, session }),
+      headers: wahaHeaders,
+      body: JSON.stringify({ chatId, text: 'Thank you for shopping with Maharashtra Dry Cleaners. Your bill is attached below.', session }),
     });
-    if (!sent.ok) return reply(502, `WAHA could not send the message (${sent.status})`);
-    return reply(200, 'Bill sent');
+    if (!sent.ok) return reply(502, `WAHA could not send the thank-you message (${sent.status})`);
+    let attachment;
+    try {
+      attachment = await fetch(`${apiUrl}/api/sendFile`, {
+        method: 'POST',
+        headers: wahaHeaders,
+        body: JSON.stringify({ chatId, session, file: { mimetype: 'application/pdf', filename: `Bill-${billId}.pdf`, data: pdf } }),
+      });
+    } catch {
+      return reply(502, 'Thank-you sent, but the PDF could not be sent. Attach the bill manually.');
+    }
+    if (!attachment.ok) return reply(502, `Thank-you sent, but the PDF failed (${attachment.status}). Attach the bill manually.`);
+    return reply(200, 'Thank-you message and bill PDF sent');
   } catch {
     return reply(500, 'Could not send bill');
   }
