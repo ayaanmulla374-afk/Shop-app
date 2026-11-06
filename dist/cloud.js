@@ -34,7 +34,7 @@
     cloudClient = client;
     cloudUser = auth.user;
     loadCloudData(state);
-    $('sendBill').textContent = 'Open in WhatsApp';
+    $('sendBill').textContent = window.SHOP_WHATSAPP_AUTO ? 'Send bill on WhatsApp' : 'Open in WhatsApp';
     $('cloudEmail').value = auth.user.email || '';
     $('cloudPassword').value = '';
     gate.classList.add('hidden');
