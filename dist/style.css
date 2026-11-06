@@ -16,6 +16,8 @@ body{cursor:default}input{cursor:text}input[type="month"]{cursor:default}
   @page{size:A4;margin:15mm}
   body{background:#fff;color:#163449;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body>header,body>main,body>footer{display:none!important}
+}
+@media print, screen{
   #invoice{display:block;font:14px Arial,sans-serif;max-width:180mm;margin:auto}
   .invoice-top{display:flex;justify-content:space-between;align-items:end;padding:20px 0 22px}
   .invoice-mark{font-size:24px;font-weight:900;color:#d95856}
@@ -50,7 +52,7 @@ html.cloud-enabled main{visibility:hidden}
 
 #specificDateField.hidden,#monthRange.hidden{display:none}
 
-@media print{
+@media print, screen{
   #invoice{box-sizing:border-box;display:flex;flex-direction:column;min-height:267mm;padding:13mm;background:#fff8d6;color:#202997;border-radius:12px}
   .invoice-top{align-items:center;padding:0 0 10mm}
   .invoice-title{order:-1;text-align:left;font-size:36px;letter-spacing:.04em;color:#202997}
@@ -68,4 +70,8 @@ html.cloud-enabled main{visibility:hidden}
   .invoice-total strong{color:#202997}
   .invoice-footer{margin-top:auto;border-top:1px solid #202997;color:#202997}
   .invoice-footer strong{color:#202997}
+}
+@media screen{
+  #invoice:not(.pdf-render){display:none}
+  #invoice.pdf-render{width:180mm}
 }
