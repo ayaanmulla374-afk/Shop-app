@@ -1,6 +1,6 @@
 # Maharashtra Dry Cleaners Billing
 
-A simple private billing site for pressing and dry cleaning. The current site lets you set prices, add items, enter quantities, calculate totals, save bills in the current browser, print bills, and open a prepared WhatsApp message for manual sending.
+A simple private billing site for pressing and dry cleaning. The current site lets you set prices, add items, enter quantities, calculate totals, save bills in the current browser, print bills, and download a bill PDF with a prepared WhatsApp thank-you message for manual sending.
 
 **GitHub live site:** https://ayaanmulla374-afk.github.io/Shop-app/
 
@@ -14,7 +14,7 @@ The site is plain HTML, CSS, and JavaScript. Serve `dist/` with any static web s
 python -m http.server 8000 --directory dist
 ```
 
-Visit `http://localhost:8000`. Bills and prices currently live in that browser's `localStorage`; clearing browser data removes them. There is no Supabase or WAHA connection in this code yet.
+Visit `http://localhost:8000`. Bills and prices currently live in that browser's `localStorage`; clearing browser data removes them. Supabase and WAHA code is present but stays inactive until the services and `dist/config.js` are configured.
 
 ## 1. Set up Supabase for customer and bill storage
 
@@ -47,4 +47,4 @@ WAHA references: [Quick Start](https://waha.devlike.pro/docs/overview/quick-star
 | Publishable key | Session name |
 | Shop owner sign-in choice | API key, entered only in protected server settings |
 
-The current **Open in WhatsApp** button prepares a message for review and manual sending. It does not use WAHA yet.
+Until Supabase and WAHA are configured, **Open in WhatsApp** prepares a thank-you message and downloads the bill PDF; attach that PDF manually after sending the message. With both services configured, the button sends the thank-you text followed by the PDF document through WAHA.
