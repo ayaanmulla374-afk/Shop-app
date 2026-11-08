@@ -67,9 +67,13 @@ function renderPrices(){
 function renderCustomers(){let q=$('searchCustomer').value.toLowerCase();$('customerList').innerHTML=data.bills.filter(b=>[b.name,b.flat||'',b.address||''].some(x=>x.toLowerCase().includes(q))).map(b=>`<div class="customer"><div><b>${escapeHtml(b.name)}</b>${b.flat?` <small>· ${escapeHtml(b.flat)}</small>`:''}<div><small>${escapeHtml(periodLabel(b))} · ${money(b.total)}</small></div></div><button data-load="${b.id}">Open bill</button></div>`).join('')||'<p class="muted">No saved bills yet.</p>';document.querySelectorAll('[data-load]').forEach(el=>el.onclick=()=>{let b=data.bills.find(x=>x.id===el.dataset.load);openedBill=b;$('customerName').value=b.name;$('flatNo').value=b.flat||'';$('phone').value=b.phone||'';$('address').value=b.address||'';$('periodType').value=b.date?'date':'range';if(b.date)$('billDate').value=b.date;else{$('fromMonth').value=b.from.slice(5);$('toMonth').value=b.to.slice(5);$('fromYear').value=b.from.slice(0,4);$('toYear').value=b.to.slice(0,4)}quantities=Object.fromEntries(b.lines.map(x=>[x.name,x.qty]));updatePeriodMode();renderItems();saveDraft();switchTab('bill')})}
 function switchTab(tab){document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));['bill','customers','settings'].forEach(x=>$(x).classList.toggle('hidden',x!==tab));if(tab==='customers')renderCustomers();if(tab==='settings')renderPrices()}document.querySelectorAll('.tabs button').forEach(x=>x.onclick=()=>switchTab(x.dataset.tab));['customerName','flatNo','phone','fromMonth','toMonth','fromYear','toYear','billDate','address'].forEach(id=>$(id).oninput=calculate);$('periodType').onchange=updatePeriodMode;$('savePrices').onclick=async()=>{const prices=[...document.querySelectorAll('[data-price]')];if(prices.some(el=>el.value!==''&&(!Number.isFinite(Number(el.value))||Number(el.value)<0||Math.abs(Number(el.value)*100-Math.round(Number(el.value)*100))>1e-8))){showStatus('priceStatus','Prices must be zero or more, with up to two decimal places.');return}for(const el of prices)data.prices[el.dataset.price]=el.value===''?0:Number(el.value);if(await persist()){renderItems();showStatus('priceStatus','Prices saved. New bills use these rates.')}else showStatus('priceStatus','Could not save prices to Supabase.')};
 $('saveBill').onclick=async()=>{try{let b=currentBill();data.bills=data.bills.filter(x=>x.id!==b.id);data.bills.unshift(b);openedBill=b;if(await persist()){saveDraft();showStatus('billStatus','Bill saved for '+b.name+'.')}}catch(e){showStatus('billStatus',e.message)}};
-function showInvoice(b){
-  const invoice=$('invoice');
-  invoice.replaceChildren($('invoiceTemplate').content.cloneNode(true));
+async function invoiceDocument(){
+  const frame=$('invoiceFrame');
+  if(frame.contentDocument?.readyState!=='complete')await new Promise((resolve,reject)=>{frame.addEventListener('load',resolve,{once:true});frame.addEventListener('error',()=>reject(Error('Bill design could not load.')),{once:true})});
+  return frame.contentDocument;
+}
+async function showInvoice(b){
+  const invoice=await invoiceDocument();
   invoice.querySelector('#customer-meta p').textContent=`Customer Name :  ${b.name}`;
   invoice.querySelectorAll('#customer-meta p')[1].textContent=`Date : ${periodLabel(b)}`;
   invoice.querySelector('#items-table tbody').innerHTML=b.lines.map((line,i)=>`<tr><td class="border-r border-b border-foreground px-2 text-center">${i+1}</td><td class="border-r border-b border-foreground px-6">${escapeHtml(line.name)}</td><td class="border-r border-b border-foreground px-2 text-center">${line.qty}</td><td class="border-b border-foreground px-2 text-center">${money(line.qty*line.rate)}</td></tr>`).join('');
@@ -77,16 +81,18 @@ function showInvoice(b){
   invoice.querySelector('#grand-total-bar span:last-child').textContent=money(b.total);
   const pressTotal=b.lines.filter(line=>/press/i.test(line.name)).reduce((sum,line)=>sum+line.qty*line.rate,0);
   const pressing=invoice.querySelector('#pressing-charges');
-  if(pressTotal){pressing.querySelector('p').innerHTML=`Pressing Charges : ${money(pressTotal)} <span class="italic">(Included)</span>`}else pressing.remove();
+  pressing.style.display=pressTotal?'':'none';
+  if(pressTotal)pressing.querySelector('p').innerHTML=`Pressing Charges : ${money(pressTotal)} <span class="italic">(Included)</span>`;
+  return invoice;
 }
-$('printBill').onclick=()=>{try{showInvoice(currentBill());window.print()}catch(e){showStatus('billStatus',e.message)}};
+$('printBill').onclick=async()=>{try{await showInvoice(currentBill());$('invoiceFrame').contentWindow.focus();$('invoiceFrame').contentWindow.print()}catch(e){showStatus('billStatus',e.message)}};
 // shortcut: the PDF is a rasterized invoice; use a PDF layout engine if selectable text is needed.
 async function billPdf(b){
-  if(!window.html2pdf)throw Error('PDF generator could not load. Check your internet connection.');
-  showInvoice(b);
-  $('invoice').classList.add('pdf-render');
-  try{await document.fonts.ready;await Promise.all([...$('invoice').querySelectorAll('img')].map(img=>img.decode()));return await html2pdf().set({margin:0,html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from($('invoice')).outputPdf('blob')}
-  finally{$('invoice').classList.remove('pdf-render')}
+  const invoice=await showInvoice(b),frame=$('invoiceFrame');
+  if(!frame.contentWindow.html2pdf)throw Error('PDF generator could not load. Check your internet connection.');
+  await invoice.fonts.ready;
+  await Promise.all([...invoice.querySelectorAll('img')].map(img=>img.decode()));
+  return await frame.contentWindow.html2pdf().set({margin:0,html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(invoice.body.firstElementChild).outputPdf('blob');
 }
 function pdfBase64(blob){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result.split(',')[1]);reader.onerror=()=>reject(Error('Could not read the bill PDF.'));reader.readAsDataURL(blob)})}
 $('sendBill').onclick=async()=>{let chat;try{

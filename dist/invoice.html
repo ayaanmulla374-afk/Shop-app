@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              border: 'hsl(var(--border))',
+              input: 'hsl(var(--input))',
+              ring: 'hsl(var(--ring))',
+              background: 'hsl(var(--background))',
+              foreground: 'hsl(var(--foreground))',
+              muted: 'hsl(var(--muted))',
+              primary: {
+                DEFAULT: 'hsl(var(--primary))',
+                foreground: 'hsl(var(--primary-foreground))',
+              },
+              accent: {
+                DEFAULT: 'hsl(var(--accent))',
+                foreground: 'hsl(var(--accent-foreground))',
+              },
+              destructive: {
+                DEFAULT: 'hsl(var(--destructive))',
+                foreground: 'hsl(var(--destructive-foreground))',
+              },
+              'invoice-paper': 'hsl(var(--invoice-paper))',
+              'header-yellow': 'hsl(var(--header-yellow))',
+              'table-header': 'hsl(var(--table-header))',
+              'charges-strip': 'hsl(var(--charges-strip))',
+              'navy-banner': 'hsl(var(--navy-banner))',
+              'table-body': 'hsl(var(--table-body))',
+            },
+            fontFamily: {
+              sans: ['system-ui', 'sans-serif'],
+              body: ["'Roboto Condensed'", 'Arial', 'sans-serif'],
+              display: ["'Roboto Condensed'", 'Arial', 'sans-serif'],
+              accent: ["'Courgette'", 'cursive'],
+              script: ["'Dancing Script'", 'cursive'],
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400&family=Roboto+Condensed:wght@500&family=Roboto+Condensed:wght@600&family=Roboto+Condensed:wght@700&family=Roboto+Condensed:wght@900&family=Courgette:wght@400&family=Dancing+Script:wght@700&display=swap"
+    />
+    <style>
+      :root {
+        --background: 51 58% 95%;
+        --foreground: 221 47% 12%;
+        --primary: 216 85% 20%;
+        --primary-foreground: 51 58% 95%;
+        --accent: 51 100% 59%;
+        --accent-foreground: 221 47% 12%;
+        --muted: 221 27% 28%;
+        --invoice-paper: 51 58% 95%;
+        --header-yellow: 51 100% 59%;
+        --table-header: 51 100% 62%;
+        --charges-strip: 50 100% 75%;
+        --navy-banner: 216 85% 20%;
+        --table-body: 49 52% 96%;
+        --border: 221 47% 12%;
+        --input: 221 47% 12%;
+        --ring: 216 85% 20%;
+        --radius: 10px;
+        --font-body: 'Roboto Condensed', Arial, sans-serif;
+        --font-display: 'Roboto Condensed', Arial, sans-serif;
+        --font-accent: 'Courgette', cursive;
+        --font-script: 'Dancing Script', cursive;
+      }
+      body {
+        background-color: hsl(var(--background));
+        color: hsl(var(--foreground));
+      }
+    </style>
+  </head>
+  <body>
+    <div class="min-h-screen bg-background text-foreground flex justify-center p-4">
+      <div class="w-full max-w-[750px] flex flex-col bg-[#FFF8D6]">
+        <section id="header" class="relative overflow-hidden bg-header-yellow py-4">
+          <div class="relative mx-auto max-w-[750px] px-4">
+            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-primary">
+              <i class="ph-bold ph-sparkle absolute -left-1 -top-6 text-[24px] text-primary"></i>
+              <i class="ph-bold ph-sparkle absolute right-2 top-0 text-[18px] text-primary"></i>
+              <i class="ph-bold ph-coat-hanger text-[116px] leading-none"></i>
+            </div>
+
+            <div
+              class="relative z-10 mx-auto flex min-h-[210px] w-[68%] flex-col items-center justify-center text-center"
+            >
+              <h1 class="font-display text-[52px] font-black leading-none tracking-[1px] text-primary sm:text-[68px]">
+                MAHARASHTRA
+              </h1>
+              <div class="mt-1 w-full rounded-[20px] bg-primary px-4 py-2">
+                <p
+                  class="font-display text-[36px] font-black leading-none tracking-[2px] text-background sm:text-[46px]"
+                >
+                  DRY CLEANERS
+                </p>
+              </div>
+              <p class="mt-2 whitespace-nowrap font-accent text-[34px] leading-none text-primary sm:text-[38px]">
+                Clean Clothes... Happy You...!
+              </p>
+              <div class="mt-1 h-[3px] w-[45%] rounded-full bg-primary"></div>
+            </div>
+
+            <div class="absolute right-0 top-1/2 w-[21.4%] -translate-y-1/2 aspect-[219/252]">
+              <img
+                src="washing-machine-towel-illustration.png"
+                alt="Washing machine with folded laundry"
+                class="h-full w-full object-contain"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section id="title-bar" class="bg-background px-7 py-3">
+          <div class="flex items-center gap-5">
+            <div class="h-[3px] flex-1 bg-primary"></div>
+            <h2 class="rounded-[15px] bg-primary px-12 py-2 text-[40px] font-bold leading-[1.1] text-background">
+              Customer Bill
+            </h2>
+            <div class="h-[3px] flex-1 bg-primary"></div>
+          </div>
+        </section>
+
+        <section id="customer-meta" class="bg-invoice-paper py-3">
+          <div
+            class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 font-body text-[29px] font-bold leading-[1.2] text-foreground"
+          >
+            <div class="flex items-center gap-3 whitespace-nowrap">
+              <i class="ph-fill ph-user text-[38px] leading-none text-primary" aria-hidden="true"></i>
+              <p>Customer Name :&nbsp; G.C. 402</p>
+            </div>
+            <div class="flex items-center gap-3 whitespace-nowrap">
+              <i class="ph-fill ph-calendar-blank text-[34px] leading-none text-primary" aria-hidden="true"></i>
+              <p>Date : September / October</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="items-table" class="bg-invoice-paper px-6 pb-3 font-body text-foreground">
+          <div class="overflow-hidden rounded-[10px] border-2 border-foreground">
+            <table class="w-full table-fixed border-collapse text-[29px] leading-[1.2]">
+              <thead class="bg-table-header font-bold">
+                <tr>
+                  <th scope="col" class="w-[17%] border-r border-b border-foreground px-2 py-2 text-center">Sr. No.</th>
+                  <th scope="col" class="w-[35%] border-r border-b border-foreground px-6 py-2 text-center">Item</th>
+                  <th scope="col" class="w-[22%] border-r border-b border-foreground px-2 py-2 text-center">Qty</th>
+                  <th scope="col" class="w-[26%] border-b border-foreground px-2 py-2 text-center">Amount (₹)</th>
+                </tr>
+              </thead>
+              <tbody class="bg-table-body font-semibold">
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">1</td>
+                  <td class="border-r border-b border-foreground px-6">Pant</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">1</td>
+                  <td class="border-b border-foreground px-2 text-center">₹150</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">2</td>
+                  <td class="border-r border-b border-foreground px-6">Short</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">2</td>
+                  <td class="border-b border-foreground px-2 text-center">₹300</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">3</td>
+                  <td class="border-r border-b border-foreground px-6">Top</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">4</td>
+                  <td class="border-b border-foreground px-2 text-center">₹600</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">4</td>
+                  <td class="border-r border-b border-foreground px-6">Blouse</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">2</td>
+                  <td class="border-b border-foreground px-2 text-center">₹300</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">5</td>
+                  <td class="border-r border-b border-foreground px-6">Lehenga</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">2</td>
+                  <td class="border-b border-foreground px-2 text-center">₹760</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">6</td>
+                  <td class="border-r border-b border-foreground px-6">Top</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">6</td>
+                  <td class="border-b border-foreground px-2 text-center">₹1,320</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">7</td>
+                  <td class="border-r border-b border-foreground px-6">Blouse</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">2</td>
+                  <td class="border-b border-foreground px-2 text-center">₹300</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">8</td>
+                  <td class="border-r border-b border-foreground px-6">Skirt</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">1</td>
+                  <td class="border-b border-foreground px-2 text-center">₹380</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">9</td>
+                  <td class="border-r border-b border-foreground px-6">Short</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">1</td>
+                  <td class="border-b border-foreground px-2 text-center">₹150</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">10</td>
+                  <td class="border-r border-b border-foreground px-6">Coat</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">2</td>
+                  <td class="border-b border-foreground px-2 text-center">₹760</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">11</td>
+                  <td class="border-r border-b border-foreground px-6">Jacket</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">2</td>
+                  <td class="border-b border-foreground px-2 text-center">₹760</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">12</td>
+                  <td class="border-r border-b border-foreground px-6">Blouse</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">6</td>
+                  <td class="border-b border-foreground px-2 text-center">₹900</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">13</td>
+                  <td class="border-r border-b border-foreground px-6">Top</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">9</td>
+                  <td class="border-b border-foreground px-2 text-center">₹1,980</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">14</td>
+                  <td class="border-r border-b border-foreground px-6">Pant</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">5</td>
+                  <td class="border-b border-foreground px-2 text-center">₹750</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">15</td>
+                  <td class="border-r border-b border-foreground px-6">Short</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">3</td>
+                  <td class="border-b border-foreground px-2 text-center">₹450</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">16</td>
+                  <td class="border-r border-b border-foreground px-6">Saree</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">5</td>
+                  <td class="border-b border-foreground px-2 text-center">₹1,400</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-b border-foreground px-2 text-center">17</td>
+                  <td class="border-r border-b border-foreground px-6">Carpet</td>
+                  <td class="border-r border-b border-foreground px-2 text-center">1</td>
+                  <td class="border-b border-foreground px-2 text-center">₹2,500</td>
+                </tr>
+                <tr>
+                  <td class="border-r border-foreground px-2 text-center">18</td>
+                  <td class="border-r border-foreground px-6">Curtain</td>
+                  <td class="border-r border-foreground px-2 text-center">6</td>
+                  <td class="px-2 text-center">₹5,400</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="subtotal-bar" class="w-full bg-background py-2 font-body">
+          <div class="mx-auto w-full max-w-7xl px-5">
+            <div class="flex overflow-hidden rounded-2xl bg-navy-banner text-navy-banner-foreground">
+              <div class="flex basis-3/4 items-center justify-center px-6 py-3">
+                <p class="text-[46px] font-bold leading-none">Subtotal</p>
+              </div>
+              <div class="flex basis-1/4 items-center justify-center border-l border-background px-4 py-3">
+                <p class="whitespace-nowrap text-[52px] font-bold leading-none">₹19,160</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="pressing-charges" class="bg-invoice-paper py-1">
+          <div class="mx-auto max-w-7xl px-6">
+            <div
+              class="flex items-center justify-center gap-5 rounded-[15px] bg-charges-strip px-6 py-2 text-primary"
+            >
+              <i class="ph-fill ph-iron text-[52px] leading-none" aria-hidden="true"></i>
+              <p class="font-body text-[38px] font-bold leading-[1.15]">
+                Pressing Charges : ₹270 <span class="italic">(Not Included)</span>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="grand-total-bar" class="bg-invoice-paper px-6 py-3">
+          <div
+            class="mx-auto flex max-w-7xl items-center justify-center gap-4 rounded-[20px] bg-navy-banner px-6 py-3 font-display text-[68px] font-bold leading-none"
+          >
+            <span class="text-navy-banner-foreground">Grand Total :</span>
+            <span class="text-accent">₹19,160</span>
+          </div>
+        </section>
+
+        <section id="footer" class="relative overflow-hidden bg-invoice-paper py-6">
+          <div class="relative mx-auto max-w-7xl px-6">
+            <div class="absolute left-[4%] top-[28%] flex items-center gap-1 text-primary" aria-hidden="true">
+              <i class="ph ph-hanger text-[76px] leading-none"></i>
+              <span class="text-accent text-[28px]">✦</span>
+              <span class="text-accent text-[20px]">✦</span>
+            </div>
+
+            <div
+              class="pointer-events-none absolute -bottom-24 -left-20 h-48 w-[42%] rounded-full border-[10px] border-accent/80"
+            ></div>
+            <div
+              class="pointer-events-none absolute -bottom-28 -right-16 h-56 w-[36%] rounded-full border-[10px] border-accent/80"
+            ></div>
+
+            <div class="relative z-10 flex flex-col items-center text-center">
+              <h2 class="font-script text-[78px] leading-none text-primary">Thank You!</h2>
+              <div class="mt-1 h-[3px] w-44 rounded-full bg-primary"></div>
+              <p class="mt-3 font-body text-[32px] font-bold italic leading-tight text-primary">
+                Visit Again – Maharashtra Dry Cleaners
+              </p>
+            </div>
+
+            <div class="absolute left-[84.2%] top-[8.9%] w-[14.5%] aspect-[148/157]">
+              <img
+                src="laundry-basket-illustration.png"
+                alt="Laundry basket filled with folded clothes"
+                class="h-full w-full object-contain"
+              />
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous"></script></body>
+</html>
