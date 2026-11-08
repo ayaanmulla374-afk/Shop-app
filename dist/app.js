@@ -85,14 +85,19 @@ async function showInvoice(b){
   if(pressTotal)pressing.querySelector('p').innerHTML=`Pressing Charges : ${money(pressTotal)} <span class="italic">(Included)</span>`;
   return invoice;
 }
-$('printBill').onclick=async()=>{try{await showInvoice(currentBill());$('invoiceFrame').contentWindow.focus();$('invoiceFrame').contentWindow.print()}catch(e){showStatus('billStatus',e.message)}};
+$('printBill').onclick=async()=>{let preview;try{const bill=currentBill();preview=window.open('about:blank','_blank');if(!preview)throw Error('Allow pop-ups to open the bill PDF.');const pdf=await billPdf(bill),url=URL.createObjectURL(pdf);preview.location.href=url;setTimeout(()=>URL.revokeObjectURL(url),60000)}catch(e){preview?.close();showStatus('billStatus',e.message)}};
 // shortcut: the PDF is a rasterized invoice; use a PDF layout engine if selectable text is needed.
 async function billPdf(b){
   const invoice=await showInvoice(b),frame=$('invoiceFrame');
-  if(!frame.contentWindow.html2pdf)throw Error('PDF generator could not load. Check your internet connection.');
+  const view=frame.contentWindow;
+  if(!view.html2pdf||!view.jspdf?.jsPDF)throw Error('PDF generator could not load. Check your internet connection.');
   await invoice.fonts.ready;
   await Promise.all([...invoice.querySelectorAll('img')].map(img=>img.decode()));
-  return await frame.contentWindow.html2pdf().set({margin:0,html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(invoice.body.firstElementChild).outputPdf('blob');
+  const canvas=await view.html2pdf().set({html2canvas:{scale:2,useCORS:true,backgroundColor:'#fff8d6'}}).from(invoice.body.firstElementChild).toCanvas().get('canvas');
+  const pdf=new view.jspdf.jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+  const scale=Math.min(210/canvas.width,297/canvas.height),width=canvas.width*scale,height=canvas.height*scale;
+  pdf.addImage(canvas.toDataURL('image/jpeg',.92),'JPEG',(210-width)/2,0,width,height);
+  return pdf.output('blob');
 }
 function pdfBase64(blob){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result.split(',')[1]);reader.onerror=()=>reject(Error('Could not read the bill PDF.'));reader.readAsDataURL(blob)})}
 $('sendBill').onclick=async()=>{let chat;try{
