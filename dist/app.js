@@ -78,11 +78,6 @@ async function showInvoice(b){
   invoice.querySelectorAll('#customer-meta p')[1].textContent=`Date : ${periodLabel(b)}`;
   invoice.querySelector('#items-table tbody').innerHTML=b.lines.map((line,i)=>`<tr><td class="border-r border-b border-foreground px-2 text-center">${i+1}</td><td class="border-r border-b border-foreground px-6">${escapeHtml(line.name)}</td><td class="border-r border-b border-foreground px-2 text-center">${line.qty}</td><td class="border-b border-foreground px-2 text-center">${money(line.qty*line.rate)}</td></tr>`).join('');
   invoice.querySelectorAll('#subtotal-bar p')[1].textContent=money(b.total);
-  invoice.querySelector('#grand-total-bar span:last-child').textContent=money(b.total);
-  const pressTotal=b.lines.filter(line=>/press/i.test(line.name)).reduce((sum,line)=>sum+line.qty*line.rate,0);
-  const pressing=invoice.querySelector('#pressing-charges');
-  pressing.style.display=pressTotal?'':'none';
-  if(pressTotal)pressing.querySelector('p').innerHTML=`Pressing Charges : ${money(pressTotal)} <span class="italic">(Included)</span>`;
   return invoice;
 }
 $('printBill').onclick=async()=>{try{await showInvoice(currentBill());$('invoiceFrame').contentWindow.focus();$('invoiceFrame').contentWindow.print()}catch(e){showStatus('billStatus',e.message)}};
