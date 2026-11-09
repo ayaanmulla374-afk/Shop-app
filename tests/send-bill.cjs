@@ -11,8 +11,10 @@ global.fetch = async (url, options) => {
   if (url.endsWith('/auth/v1/user')) return Response.json({ id: 'owner' });
   if (url.includes('/rest/v1/shop_state')) return Response.json([{ data: { bills: [{ id: 'bill1', phone: '9876543210' }] } }]);
   if (url.endsWith('/media')) return Response.json({ id: 'media1' });
+  if (url.endsWith('/rest/v1/whatsapp_delivery')) return Response.json({}, { status: 201 });
   if (documentStatus === 0 && calls.filter(c => c.url.endsWith('/messages')).length === 2) throw Error('Network failure');
-  return Response.json({ messages: [{ id: 'wamid.test' }] }, { status: calls.filter(c => c.url.endsWith('/messages')).length === 2 ? documentStatus : 200 });
+  const count = calls.filter(c => c.url.endsWith('/messages')).length;
+  return Response.json({ messages: [{ id: `wamid.${count}` }] }, { status: count === 2 ? documentStatus : 200 });
 };
 require('../supabase/functions/send-bill/index.ts');
 const request = (body, token = 'owner-token') => new Request('https://test.supabase.co/functions/v1/send-bill', {
@@ -27,17 +29,18 @@ const request = (body, token = 'owner-token') => new Request('https://test.supab
 
   let response = await handler(request(body));
   assert.equal(response.status, 200);
-  assert.deepEqual(calls.slice(-3).map(call => call.url.split('/').pop()), ['media', 'messages', 'messages']);
-  const upload = calls.at(-3).options.body;
+  assert.deepEqual(calls.slice(-5).map(call => call.url.split('/').pop()), ['media', 'messages', 'whatsapp_delivery', 'messages', 'whatsapp_delivery']);
+  const upload = calls.at(-5).options.body;
   assert.equal(upload.get('messaging_product'), 'whatsapp');
   assert.equal(upload.get('file').type, 'application/pdf');
-  assert.equal(calls.at(-3).options.headers.Authorization, 'Bearer secret');
-  const text = JSON.parse(calls.at(-2).options.body);
-  const pdf = JSON.parse(calls.at(-1).options.body);
+  assert.equal(calls.at(-5).options.headers.Authorization, 'Bearer secret');
+  const text = JSON.parse(calls.at(-4).options.body);
+  const pdf = JSON.parse(calls.at(-2).options.body);
   assert.equal(text.to, '919876543210');
   assert.equal(text.template.name, 'bill_thank_you');
   assert.equal(pdf.template.name, 'bill_pdf');
   assert.equal(pdf.template.components[0].parameters[0].document.id, 'media1');
+  assert.deepEqual(calls.filter(c => c.url.endsWith('/whatsapp_delivery')).map(c => JSON.parse(c.options.body).part), ['thank_you', 'pdf']);
 
   calls.length = 0;
   documentStatus = 400;
