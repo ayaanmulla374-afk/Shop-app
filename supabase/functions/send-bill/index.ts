@@ -43,9 +43,10 @@ Deno.serve(async (request) => {
     const endpoint = `https://graph.facebook.com/v25.0/${phoneId}`;
     const metaHeaders = { Authorization: `Bearer ${metaToken}` };
 
+    const filename = `Bill-${billId}-${crypto.randomUUID()}.pdf`;
     const media = new FormData();
     media.append('messaging_product', 'whatsapp');
-    media.append('file', new Blob([Uint8Array.from(atob(pdf), c => c.charCodeAt(0))], { type: 'application/pdf' }), `Bill-${billId}.pdf`);
+    media.append('file', new Blob([Uint8Array.from(atob(pdf), c => c.charCodeAt(0))], { type: 'application/pdf' }), filename);
     const upload = await fetch(`${endpoint}/media`, { method: 'POST', headers: metaHeaders, body: media });
     if (!upload.ok) return reply(502, `Meta could not upload the PDF (${upload.status})`);
     const mediaId = (await upload.json()).id;
@@ -72,7 +73,7 @@ Deno.serve(async (request) => {
     await track(sentText, 'thank_you');
     let document;
     try {
-      document = await send({ name: 'bill_pdf', language: { code: 'en' }, components: [{ type: 'header', parameters: [{ type: 'document', document: { id: mediaId, filename: `Bill-${billId}.pdf` } }] }] });
+      document = await send({ name: 'bill_pdf', language: { code: 'en' }, components: [{ type: 'header', parameters: [{ type: 'document', document: { id: mediaId, filename } }] }] });
     } catch {
       return reply(502, 'Thank-you sent, but the PDF could not be sent. Send the PDF manually.');
     }
