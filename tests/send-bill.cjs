@@ -42,6 +42,15 @@ const request = (body, token = 'owner-token') => new Request('https://test.supab
   assert.equal(pdf.template.components[0].parameters[0].document.id, 'media1');
   assert.deepEqual(calls.filter(c => c.url.endsWith('/whatsapp_delivery')).map(c => JSON.parse(c.options.body).part), ['thank_you', 'pdf']);
 
+  const firstFilename = upload.get('file').name;
+  calls.length = 0;
+  response = await handler(request(body));
+  assert.equal(response.status, 200);
+  const resendUpload = calls.find(call => call.url.endsWith('/media')).options.body;
+  const resendPdf = JSON.parse(calls.filter(call => call.url.endsWith('/messages')).at(-1).options.body);
+  assert.notEqual(resendUpload.get('file').name, firstFilename);
+  assert.equal(resendPdf.template.components[0].parameters[0].document.filename, resendUpload.get('file').name);
+
   calls.length = 0;
   documentStatus = 400;
   response = await handler(request(body));
