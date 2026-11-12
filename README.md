@@ -4,7 +4,7 @@
 
 The shop owner signs in through Supabase, sets prices, creates bills, and reopens saved bills. **Save bill** writes the bill to the owner's Supabase `shop_state` row. The print button uses the same invoice layout shown in the downloaded PDF.
 
-**Open in WhatsApp** currently downloads the PDF and opens a prepared thank-you message for manual sending. Automatic sending is prepared but disabled until the Meta WhatsApp Business Platform is configured and tested. Once enabled, **Send bill on WhatsApp** saves the bill, uploads its PDF to Meta, then sends an approved thank-you template followed by an approved PDF template. See [supabase/SETUP.md](supabase/SETUP.md).
+**Open in WhatsApp** currently downloads the PDF and opens a prepared thank-you message for manual sending. Automatic sending is prepared but disabled until the Meta WhatsApp Business Platform is configured and tested. Once enabled, **Send bill on WhatsApp** saves the bill, uploads its PDF to Meta, then sends an approved PDF template. See [supabase/SETUP.md](supabase/SETUP.md).
 
 ## Run locally
 

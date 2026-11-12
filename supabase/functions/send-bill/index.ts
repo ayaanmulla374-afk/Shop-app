@@ -68,18 +68,23 @@ Deno.serve(async (request) => {
         if (!saved.ok) trackingOk = false;
       } catch { trackingOk = false; }
     };
-    const sentText = await send({ name: 'bill_thank_you', language: { code: 'en' } });
-    if (!sentText.ok) return reply(502, `Meta could not send the thank-you message (${sentText.status})`);
-    await track(sentText, 'thank_you');
+    const customerName = typeof bill.name === 'string' && bill.name.trim() ? bill.name.trim() : 'Customer';
     let document;
     try {
-      document = await send({ name: 'bill_pdf', language: { code: 'en' }, components: [{ type: 'header', parameters: [{ type: 'document', document: { id: mediaId, filename } }] }] });
+      document = await send({
+        name: 'bill_pdf_utility_v2',
+        language: { code: 'en' },
+        components: [
+          { type: 'header', parameters: [{ type: 'document', document: { id: mediaId, filename } }] },
+          { type: 'body', parameters: [{ type: 'text', text: customerName }] },
+        ],
+      });
     } catch {
-      return reply(502, 'Thank-you sent, but the PDF could not be sent. Send the PDF manually.');
+      return reply(502, 'Meta could not send the bill PDF');
     }
-    if (!document.ok) return reply(502, `Thank-you sent, but the PDF failed (${document.status}). Send the PDF manually.`);
+    if (!document.ok) return reply(502, `Meta could not send the bill PDF (${document.status})`);
     await track(document, 'pdf');
-    return reply(200, trackingOk ? 'Thank-you message and bill PDF accepted by Meta' : 'Meta accepted both messages, but delivery tracking could not be saved. Check the recipient phone.');
+    return reply(200, trackingOk ? 'Bill PDF accepted by Meta' : 'Meta accepted the bill PDF, but delivery tracking could not be saved. Check the recipient phone.');
   } catch {
     return reply(500, 'Could not send bill');
   }
